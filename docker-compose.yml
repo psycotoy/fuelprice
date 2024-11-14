@@ -1,0 +1,27 @@
+services:
+  web:
+    image: python:3.10-slim  # Python 기본 이미지 사용
+    container_name: fuelprice
+    working_dir: /app
+    volumes:
+      - /home/ubuntu/fuelprice/templates:/app/templates
+      - /home/ubuntu/fuelprice/data:/app/data
+      - /home/ubuntu/fuelprice:/app  # fuelprice.py와 requirements.txt 파일을 컨테이너로 마운트
+    environment:
+      - PROJ_LIB=/usr/share/proj  # PROJ 경로 설정
+    command: >
+      sh -c "apt-get update && 
+             apt-get install -y libproj-dev proj-bin gcc g++ && 
+             pip install --upgrade pip && 
+             pip install Cython &&  # Cython 설치
+             pip install --no-cache-dir -r requirements.txt && 
+             python fuelprice.py"
+    ports:
+      - "51234:51234"
+    restart: unless-stopped
+    networks:
+      - portainer_portainer-net
+
+networks:
+  portainer_portainer-net:
+    external: true
