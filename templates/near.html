@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>주유소 유가 정보</title>
+    <script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    function showPosition(position) {
+        const x = position.coords.longitude;
+        const y = position.coords.latitude;
+        const fuelType = document.getElementById("fuelType").value;
+        window.location.href = `/near?x=${x}&y=${y}&fuelType=${fuelType}`;
+    }
+
+    function showError(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보 사용을 허용하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 타임아웃되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+    }
+    </script>
+</head>
+<body>
+    <h1>주변 주유소 유가 정보</h1>
+    <button onclick="window.location.href='https://fuel.dlsdn.com';">기본 주유소</button>
+    <table border="1">
+    <!-- 유종 선택 옵션 -->
+    <label for="fuelType">유종 선택:</label>
+    <select id="fuelType">
+        <option value="B034" {% if selected_fuel == 'B034' %}selected{% endif %}>고급휘발유</option> 
+        <option value="B027" {% if selected_fuel == 'B027' %}selected{% endif %}>휘발유</option>
+        <option value="D047" {% if selected_fuel == 'D047' %}selected{% endif %}>경유</option>
+        <option value="C004" {% if selected_fuel == 'C004' %}selected{% endif %}>등유</option>
+        <option value="K015" {% if selected_fuel == 'K015' %}selected{% endif %}>LPG</option>
+    </select>
+
+    <button onclick="getLocation()">검색</button>
+
+    <table border="1">
+        <tr>
+            <th>브랜드</th>
+            <th>주유소 이름</th>
+            <th>가격</th>
+            <th>거리 (km)</th>
+        </tr>
+        {% for station in gas_stations %}
+            <tr>
+                <td>
+                    {% if station.brand_code == 'SKE' %}SK
+                    {% elif station.brand_code == 'GSC' %}GS
+                    {% elif station.brand_code == 'HDO' %}현대
+                    {% elif station.brand_code == 'SOL' %}SOIL
+                    {% elif station.brand_code == 'RTO' %}알뜰
+                    {% elif station.brand_code == 'RTE' %}자영
+                    {% elif station.brand_code == 'RTX' %}EX
+                    {% elif station.brand_code == 'NHO' %}알뜰
+                    {% elif station.brand_code == 'E1G' %}E1
+                    {% elif station.brand_code == 'SKG' %}SK가스
+                    {% elif station.brand_code == 'ETC' %}자가
+                    {% else %}알 수 없는 브랜드
+                    {% endif %}
+                </td>
+                <td>{{ station.name }}</td>
+                <td>
+                    {{ "{:,.0f}".format(station.price) if station.price is not none else "가격 정보 없음" }}
+                </td>
+                <td>
+                    {{ "{:.1f}".format(station.distance_km) if station.distance_km is not none else "거리 정보 없음" }}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

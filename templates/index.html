@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>주유소 유가 정보</title>
+    <style>
+        .lowest-price {
+            font-weight: bold;
+            background-color: #f0f0f0; /* 연회색 배경 */
+            padding: 3px;
+            border-radius: 3px; /* 모서리를 둥글게 */
+        }
+    </style>
+</head>
+<body>
+    <h1>주유소 유가 정보</h1>
+    <button onclick="window.location.href='https://fuel.dlsdn.com/near';">내 주변 주유소</button>
+    <table border="1">
+        <tr>
+            <th>브랜드</th>
+            <th>주유소 이름</th>
+            <th>유종</th>
+            <th>가격</th>
+            <th>업데이트 날짜</th>
+            <th>업데이트 시간</th>
+            <th>주소</th>
+        </tr>
+        {% for station in gas_stations %}
+            <tr>
+                <td rowspan="{{ station.prices|length }}">
+                    {% if station.brand_code == 'SKE' %}SK
+                    {% elif station.brand_code == 'GSC' %}GS
+                    {% elif station.brand_code == 'HDO' %}현대
+                    {% elif station.brand_code == 'SOL' %}SOIL
+                    {% elif station.brand_code == 'RTO' %}알뜰
+                    {% elif station.brand_code == 'RTE' %}자영
+                    {% elif station.brand_code == 'RTX' %}EX
+                    {% elif station.brand_code == 'NHO' %}알뜰
+                    {% elif station.brand_code == 'E1G' %}E1
+                    {% elif station.brand_code == 'SKG' %}SK가스
+                    {% elif station.brand_code == 'ETC' %}자가
+                    {% else %}알 수 없는 브랜드
+                    {% endif %}
+                </td>
+                <td rowspan="{{ station.prices|length }}">{{ station.name }}</td>
+                {% for price in station.prices|sort(attribute="fuel_type") %}
+                    {% if not loop.first %}
+                    <tr>
+                    {% endif %}
+                    <td>
+                        {% if price.fuel_type == '고급휘발유' %}고급휘발유
+                        {% elif price.fuel_type == '휘발유' %}휘발유
+                        {% elif price.fuel_type == '경유' %}경유
+                        {% elif price.prod_code == 'C004' %}등유
+                        {% elif price.prod_code == 'K015' %}LPG
+                        {% else %}알 수 없는 유종
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if price.fuel_type and price.price == min_prices[price.fuel_type] %}
+                            <span class="lowest-price">{{ "{:,.0f}".format(price.price) }}</span>
+                        {% else %}
+                            {{ "{:,.0f}".format(price.price) }}
+                        {% endif %}
+                    </td>
+                    <td>{{ price.trade_date }}</td>
+                    <td>{{ price.trade_time }}</td>
+                    {% if loop.first %}
+                        <td rowspan="{{ station.prices|length }}">
+                            <a href="https://map.kakao.com/?q={{ station.address }}" target="_blank">{{ station.address }}</a>
+                        </td>
+                    {% endif %}
+                    </tr>
+                {% endfor %}
+        {% endfor %}
+    </table>
+</body>
+</html>

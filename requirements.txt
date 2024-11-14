@@ -1,0 +1,4 @@
+Flask==2.0.1
+requests==2.26.0
+Werkzeug==2.0.3
+pyproj==3.4.1  # 최신 버전으로 업데이트
